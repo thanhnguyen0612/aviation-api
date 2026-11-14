@@ -43,3 +43,17 @@ resilience4j:
         limit-for-period: 90
         limit-refresh-period: 1m
         timeout-duration: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  health:
+    circuitbreakers:
+      enabled: true
+
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
