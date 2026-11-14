@@ -1,6 +1,10 @@
 spring:
   application:
     name: aviation-api
+  cache:
+    cache-names: airports
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=1h
 
 aviation-weather:
   base-url: https://aviationweather.gov
