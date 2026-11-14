@@ -172,4 +172,10 @@ Settings (`application.yml`, instance `aviationWeather`):
 
 ## AI usage
 
-I used Claude Code (Anthropic) to brainstorm the design, write the spec and implementation plan (in `docs/superpowers/`), and generate the code and tests through subagents, with a review step after each task. I reviewed, ran and verified everything, and can explain all of it.
+I used [Claude Code](https://claude.com/claude-code) (Anthropic) with the [Superpowers](https://github.com/obra/superpowers) plugin, which adds a structured workflow:
+
+- **Brainstorming:** clarified requirements, checked the live upstream API, and produced the design spec in `docs/superpowers/specs/`.
+- **Planning:** turned the spec into a task-by-task, test-first implementation plan in `docs/superpowers/plans/`.
+- **Subagent-driven development:** each task was implemented by a subagent, followed by a spec-and-quality review, with a final review of the whole branch.
+
+I made the key decisions (stack, Clean Architecture variant, response shape, rate limiter, scope), reviewed, ran and verified everything, and can explain all of it.
