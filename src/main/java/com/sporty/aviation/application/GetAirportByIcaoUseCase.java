@@ -16,7 +16,7 @@ public class GetAirportByIcaoUseCase {
         this.provider = provider;
     }
 
-    @Cacheable(cacheNames = "airports", key = "#icao.toUpperCase()")
+    @Cacheable(cacheNames = "airports", key = "#icao.toUpperCase()", sync = true)
     public Airport execute(String icao) {
         String code = icao.toUpperCase(Locale.ROOT);
         return provider.findByIcao(code).orElseThrow(() -> new AirportNotFoundException(code));

@@ -129,22 +129,23 @@ Settings (`application.yml`, instance `aviationWeather`):
 |---|---|
 | Timeouts | connect 2s, read 3s |
 | Retry | 3 attempts, 200ms base, x2 exponential; only 5xx and I/O errors, never 4xx or 429 |
-| Circuit breaker | count-based window 10, min 5 calls, 50% failure threshold, open 30s, 3 half-open calls; records 5xx, I/O errors, 429, 403 only (not-found is not a failure) |
+| Circuit breaker | count-based window 10, min 5 calls, 50% failure threshold, open 30s, 3 half-open calls; records 5xx, I/O errors, 429, 403 only (not-found is not a failure); our limiter's `RequestNotPermitted` is ignored, and other unlisted exceptions (e.g. unexpected 4xx, malformed body) are not recorded as failures |
 | Rate limiter | 90 permits per minute (headroom under upstream's 100), no wait |
-| Cache | Caffeine `maximumSize=10000,expireAfterWrite=1h,recordStats`; successful lookups only (TTL matches upstream `max-age=3600`) |
+| Cache | Caffeine `maximumSize=10000,expireAfterWrite=1h,recordStats`; successful lookups only (TTL matches upstream `max-age=3600`); `sync = true` so concurrent cold requests for one code make a single upstream call |
 | Fallback | clean 503 after retries or when the breaker is open; serving stale cache is a next step |
 
 **Aspect order:** Resilience4j's default, Retry wraps CircuitBreaker wraps RateLimiter wraps the call.
 
 - Each retry attempt consumes a rate-limiter permit, so retries cannot push us past the upstream limit.
 - During an outage the breaker can open mid-retry and block the remaining attempts (covered by `AviationWeatherCircuitBreakerTest`).
-- A rate-limiter rejection is not retried and is not recorded as a breaker failure, since the upstream was never called.
+- A rate-limiter rejection is not retried and is ignored by the breaker (neither failure nor success), since the upstream was never called.
+- **Worst-case latency:** up to 3 attempts x (2s connect + 3s read) plus backoff, roughly 15-16s. In practice this is bounded because the breaker opens after repeated failures; a TimeLimiter / overall deadline is a next step.
 
 **Caveat:** the rate limiter is **per instance**. Several instances need a distributed limiter (e.g. Redis-backed) or a lower per-instance quota.
 
 ## Observability
 
-- SLF4J logs: one INFO line per upstream lookup (`icao`, `outcome`, `latencyMs`), WARN on failures and fallbacks, ERROR with stack trace only for unexpected errors. No request bodies or secrets.
+- SLF4J logs: one INFO line per upstream attempt (`icao`, `outcome`, `latencyMs`; retries log one line each), WARN on failures and fallbacks, ERROR with stack trace only for unexpected errors. No request bodies or secrets.
 - Actuator exposes only `health`, `info`, `metrics`:
   - `/actuator/health` includes the circuit breaker health indicator.
   - `/actuator/metrics` includes `resilience4j.circuitbreaker.*`, retry and rate-limiter metrics, and Caffeine cache metrics (`cache.gets`, etc.).
@@ -154,7 +155,8 @@ Settings (`application.yml`, instance `aviationWeather`):
 
 - Strict path-variable validation before any outbound call (also prevents injecting into the upstream query).
 - Upstream errors are never echoed; `server.error.include-stacktrace` and `include-message` are `never`.
-- Outbound HTTPS only; base URL comes from configuration.
+- Default upstream URL is HTTPS; the base URL comes from configuration.
+- **Quota-exhaustion risk:** an anonymous caller looping over random valid-format codes (never cached; each 204 costs a permit) can exhaust the shared 90/min outbound budget, making every cache-missing lookup 503 for everyone. Mitigation (not built): inbound per-client rate limiting or an API key at the gateway; see "What I'd do next".
 - Docker image runs as a non-root user.
 - Actuator exposure limited to `health,info,metrics`.
 
@@ -166,6 +168,7 @@ Settings (`application.yml`, instance `aviationWeather`):
 - Serve stale cache when the upstream is down (instead of 503).
 - Multiple providers behind `AirportProvider`, with fallback between them.
 - Prometheus registry and dashboards; batch lookup.
+- Dockerfile hardening: pinned image digests, dependency-layer caching, HEALTHCHECK.
 
 ## AI usage
 

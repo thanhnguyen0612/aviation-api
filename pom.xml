@@ -12,20 +12,7 @@
 	<artifactId>aviation-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>aviation-api</name>
-	<description/>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	<description>Airport lookup microservice by ICAO code, backed by aviationweather.gov</description>
 	<properties>
 		<java.version>21</java.version>
 	</properties>

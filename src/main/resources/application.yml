@@ -32,6 +32,8 @@ resilience4j:
         wait-duration-in-open-state: 30s
         permitted-number-of-calls-in-half-open-state: 3
         register-health-indicator: true
+        ignore-exceptions:
+          - io.github.resilience4j.ratelimiter.RequestNotPermitted
         record-exceptions:
           - org.springframework.web.client.HttpServerErrorException
           - org.springframework.web.client.ResourceAccessException
