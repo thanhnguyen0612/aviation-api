@@ -4,7 +4,7 @@ spring:
   cache:
     cache-names: airports
     caffeine:
-      spec: maximumSize=10000,expireAfterWrite=1h
+      spec: maximumSize=10000,expireAfterWrite=1h,recordStats
 
 aviation-weather:
   base-url: https://aviationweather.gov
