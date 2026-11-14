@@ -1,13 +1,13 @@
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /build
-COPY .mvn .mvn
-COPY mvnw pom.xml ./
+COPY gradlew settings.gradle.kts build.gradle.kts ./
+COPY gradle gradle
 COPY src src
-RUN ./mvnw -q -DskipTests package
+RUN ./gradlew --no-daemon -q bootJar
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY --from=build /build/target/*.jar app.jar
+COPY --from=build /build/build/libs/*.jar app.jar
 RUN useradd --system --no-create-home appuser
 USER appuser
 EXPOSE 8080

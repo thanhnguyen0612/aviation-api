@@ -48,7 +48,7 @@ Target effort: the assignment suggests ~90 minutes; keep the scope in that spiri
 
 ## 4. Decided by the candidate
 
-- **Stack:** Java + Spring Boot, Maven, Spring `RestClient`, Resilience4j, an in-memory cache, Spring Boot Actuator, WireMock for the integration test.
+- **Stack:** Java + Spring Boot, Maven (later switched to Gradle with the Kotlin DSL at the candidate's request), Spring `RestClient`, Resilience4j, an in-memory cache, Spring Boot Actuator, WireMock for the integration test.
 - **Response contains key info only** (per the PDF: "name, location, ICAO/IATA, etc."): no runways/frequencies.
 - **Docker + Actuator are in**; OpenAPI, inbound rate limiting, auth are README "next steps".
 - **Small and explainable over impressive.**

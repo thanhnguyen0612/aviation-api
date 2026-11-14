@@ -6,11 +6,11 @@ A small Java 21 / Spring Boot 4 microservice that returns airport details for an
 
 ## Run
 
-Requires Java 21 (Maven is bundled as `./mvnw`).
+Requires Java 21 (Gradle is bundled as `./gradlew`).
 
 ```bash
-# Maven
-./mvnw spring-boot:run
+# Gradle
+./gradlew bootRun
 
 # Docker
 docker build -t aviation-api .
@@ -53,7 +53,7 @@ Lowercase input works (`kjfk`); it is normalised to upper case and shares the ca
 ## Running tests
 
 ```bash
-./mvnw test
+./gradlew test
 ```
 
 | Test | Covers |
