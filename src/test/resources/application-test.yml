@@ -1,0 +1,4 @@
+resilience4j:
+  retry.instances.aviationWeather.wait-duration: 10ms
+  ratelimiter.instances.aviationWeather.limit-for-period: 1000
+  circuitbreaker.instances.aviationWeather.minimum-number-of-calls: 100
