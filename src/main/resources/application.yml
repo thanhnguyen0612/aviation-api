@@ -1,3 +1,41 @@
 spring:
   application:
     name: aviation-api
+
+aviation-weather:
+  base-url: https://aviationweather.gov
+  connect-timeout: 2s
+  read-timeout: 3s
+
+resilience4j:
+  retry:
+    instances:
+      aviationWeather:
+        max-attempts: 3
+        wait-duration: 200ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - org.springframework.web.client.ResourceAccessException
+  circuitbreaker:
+    instances:
+      aviationWeather:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        register-health-indicator: true
+        record-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - org.springframework.web.client.ResourceAccessException
+          - org.springframework.web.client.HttpClientErrorException$TooManyRequests
+          - org.springframework.web.client.HttpClientErrorException$Forbidden
+  ratelimiter:
+    instances:
+      aviationWeather:
+        limit-for-period: 90
+        limit-refresh-period: 1m
+        timeout-duration: 0
